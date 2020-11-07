@@ -6,7 +6,7 @@ const unsigned long tiempo_total_mando = 3000; //tiempo para completar las rafag
 const int rafagas_esperadas = 3;
 const int ON = 1;
 const int OFF = 0;
-const int LOG = 1;
+const int LOG = 0;
 
 // Variables will change:
 int rafagas_consecutivas = 0;
@@ -26,15 +26,16 @@ void setup() {
   // initialize serial communication:
   Serial.begin(9600);
   Serial.println("Listo!");
+
 }
 
 void loop() {
   estado_actual = digitalRead(rafaga_pin);
   my_time = millis();
-  
+
   if (estado_actual != estado_previo) {
     estado_previo = estado_actual;
-    
+
     if (estado_actual == HIGH) {
       //Hemos pulsado una rafaga
       if (rafagas_consecutivas == 0) {
@@ -45,33 +46,34 @@ void loop() {
       }
       rafagas_consecutivas ++;
 
-      if (rafagas_consecutivas >= rafagas_esperadas){
+      if (rafagas_consecutivas >= rafagas_esperadas) {
         ciclo_terminado = ON;
         if (mando == OFF) {
-          logger((String)"Encendiendo el mando!"+tiempo_ciclo+" - " + my_time+" - "+ (my_time > (tiempo_ciclo + tiempo_total_ciclo)));
+          logger((String)"Encendiendo el mando!" + tiempo_ciclo + " - " + my_time + " - " + (my_time > (tiempo_ciclo + tiempo_total_ciclo)));
           tiempo_mando_on = my_time;
           mando = ON;
           digitalWrite(mando_pin, HIGH);
-        } else {
-          logger((String)"Abortando encendido de mando! Rafaga " + rafagas_consecutivas + " detectada");
-          logger((String)"El ciclo empezo a: " +tiempo_ciclo+" Ahora es: " + my_time+" Fuera de Ciclo: "+ (my_time > (tiempo_ciclo + tiempo_total_ciclo))+" ciclo_terminado: "+ ciclo_terminado);
-          mando = OFF;
-          digitalWrite(mando_pin, LOW);
-        }
+        } 
+        //else {
+        //  logger((String)"Abortando encendido de mando! Rafaga " + rafagas_consecutivas + " detectada");
+        //  logger((String)"El ciclo empezo a: " + tiempo_ciclo + " Ahora es: " + my_time + " Fuera de Ciclo: " + (my_time > (tiempo_ciclo + tiempo_total_ciclo)) + " ciclo_terminado: " + ciclo_terminado);
+        //  mando = OFF;
+        //  digitalWrite(mando_pin, LOW);
+        // }
       }
     }
   }
 
-  if (rafagas_consecutivas > 0 && ciclo_terminado == OFF 
-    && (my_time > (tiempo_ciclo + tiempo_total_ciclo))) {
+  if (rafagas_consecutivas > 0 && ciclo_terminado == OFF
+      && (my_time > (tiempo_ciclo + tiempo_total_ciclo))) {
     //Se ha terminado el ciclo por tiempo.
-    logger((String)"Ciclo abortado por caducidad de tiempo: "+tiempo_ciclo+" - " + my_time);
+    logger((String)"Ciclo abortado por caducidad de tiempo: " + tiempo_ciclo + " - " + my_time);
 
     rafagas_consecutivas = 0;
   }
 
-  if (ciclo_terminado == ON 
-    && my_time > (tiempo_mando_on + tiempo_total_mando)) {
+  if (ciclo_terminado == ON
+      && my_time > (tiempo_mando_on + tiempo_total_mando)) {
     //Apago el mando
     logger((String)"Apagando mando. Puerta abierta.");
     digitalWrite(mando_pin, LOW);
@@ -83,7 +85,7 @@ void loop() {
   delay(100);
 }
 
-void logger (String msg){
+void logger (String msg) {
   if (LOG)
     Serial.println(msg);
-  }
+}
